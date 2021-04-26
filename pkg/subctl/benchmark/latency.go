@@ -17,13 +17,24 @@ package benchmark
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/onsi/gomega"
 	"github.com/submariner-io/shipyard/test/e2e/framework"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/submariner-io/submariner-operator/pkg/subctl/table"
 )
 
 const globalnetGlobalIPAnnotation = "submariner.io/globalIp"
+
+type latencyTypes struct {
+	minLatency      string
+	meanLatency     string
+	maxLatency      string
+	stddevLatency   string
+	transactionRate string
+}
 
 type benchmarkTestParams struct {
 	ClientCluster       framework.ClusterIndex
@@ -118,4 +129,30 @@ func runLatencyTest(f *framework.Framework, testParams benchmarkTestParams) {
 
 	framework.By(fmt.Sprintf("Waiting for the client pod %q to exit, returning what client sent", nettestClientPod.Pod.Name))
 	nettestClientPod.AwaitFinishVerbose(Verbose)
+	latencyValues := strings.Split(nettestClientPod.TerminationMessage, "\n")[2]
+	values := strings.Split(latencyValues, ",")
+
+	var value []interface{}
+	value = append(value, latencyTypes{
+		minLatency:      values[0],
+		meanLatency:     values[1],
+		maxLatency:      values[2],
+		stddevLatency:   values[3],
+		transactionRate: values[4],
+	})
+	latencyPrinter.Print(value)
+}
+
+var latencyPrinter = table.Printer{
+	Headers: []table.Header{
+		{Name: "Minimum Latency (μs)", MaxLength: 20}, {Name: "Mean Latency (μs)", MaxLength: 18},
+		{Name: "Maximum Latency (μs)", MaxLength: 20}, {Name: "Stddev Latency (μs)", MaxLength: 20},
+		{Name: "Transaction Rate (Tran/s)", MaxLength: 25},
+	},
+	RowConverterFunc: func(obj interface{}) []string {
+		item := obj.(latencyTypes)
+		return []string{
+			item.minLatency, item.meanLatency, item.maxLatency, item.stddevLatency, item.transactionRate,
+		}
+	},
 }
