@@ -55,6 +55,10 @@ var (
 	}
 )
 
+func AddToRootCommand(cmd *cobra.Command) {
+	rootCmd.AddCommand(cmd)
+}
+
 func Execute() error {
 	return rootCmd.Execute()
 }
@@ -62,11 +66,11 @@ func Execute() error {
 func init() {
 	rootCmd.AddCommand(cmdversion.Cmd)
 	cloudCmd := cloud.NewCommand(&kubeConfig, &kubeContext)
-	addKubeconfigFlag(cloudCmd)
+	AddKubeconfigFlag(cloudCmd)
 	rootCmd.AddCommand(cloudCmd)
 }
 
-func addKubeconfigFlag(cmd *cobra.Command) {
+func AddKubeconfigFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&kubeConfig, "kubeconfig", "", "absolute path(s) to the kubeconfig file(s)")
 	cmd.PersistentFlags().StringSliceVar(&kubeContexts, "kubecontext", nil, "kubeconfig context to use")
 	if len(kubeContexts) > 0 {

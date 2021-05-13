@@ -211,7 +211,7 @@ func checkValidateArguments(args []string) error {
 		if strings.Compare(args[0], args[1]) == 0 {
 			return fmt.Errorf("kubeconfig file <kubeConfig1> and <kubeConfig2> cannot be the same file")
 		}
-		same, err := compareFiles(args[0], args[1])
+		same, err := CompareFiles(args[0], args[1])
 		if err != nil {
 			return err
 		}

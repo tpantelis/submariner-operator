@@ -47,6 +47,13 @@ test_subctl_gather
 
 # Run subctl diagnose as a sanity check
 
+${DAPPER_SOURCE}/bin/subctl diagnose cni
+${DAPPER_SOURCE}/bin/subctl diagnose connections
+${DAPPER_SOURCE}/bin/subctl diagnose deployment
+${DAPPER_SOURCE}/bin/subctl diagnose kube-proxy-mode
+${DAPPER_SOURCE}/bin/subctl diagnose firewall metrics
+${DAPPER_SOURCE}/bin/subctl diagnose firewall vxlan
+${DAPPER_SOURCE}/bin/subctl diagnose firewall tunnel ${KUBECONFIGS_DIR}/kind-config-cluster1 ${KUBECONFIGS_DIR}/kind-config-cluster2
 ${DAPPER_SOURCE}/bin/subctl diagnose all
 
 # Run benchmark commands for sanity checks
