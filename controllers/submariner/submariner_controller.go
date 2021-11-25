@@ -23,24 +23,6 @@ import (
 	"reflect"
 
 	"github.com/go-logr/logr"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
 	submopv1a1 "github.com/submariner-io/submariner-operator/api/submariner/v1alpha1"
 	submarinerclientset "github.com/submariner-io/submariner-operator/pkg/client/clientset/versioned"
 	"github.com/submariner-io/submariner-operator/pkg/discovery/network"
@@ -48,6 +30,19 @@ import (
 	"github.com/submariner-io/submariner-operator/pkg/images"
 	crdutils "github.com/submariner-io/submariner-operator/pkg/utils/crds"
 	submv1 "github.com/submariner-io/submariner/pkg/apis/submariner.io/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const (
@@ -237,44 +232,45 @@ func (r *SubmarinerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	// Create a new controller
-	c, err := controller.New("submariner-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
+	//c, err := controller.New("submariner-controller", mgr, controller.Options{Reconciler: r})
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//// Watch for changes to primary resource Submariner
+	//err = c.Watch(&source.Kind{Type: &submopv1a1.Submariner{}}, &handler.EnqueueRequestForObject{})
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//// Watch for changes to secondary resource DaemonSets and requeue the owner Submariner
+	//err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
+	//	IsController: true,
+	//	OwnerType:    &submopv1a1.Submariner{},
+	//})
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//// Watch for changes to the gateway status in the same namespace
+	//mapFn := handler.MapFunc(
+	//	func(object client.Object) []reconcile.Request {
+	//		return []reconcile.Request{
+	//			{NamespacedName: types.NamespacedName{
+	//				Name:      "submariner",
+	//				Namespace: object.GetNamespace(),
+	//			}},
+	//		}
+	//	})
+	//err = c.Watch(&source.Kind{Type: &submv1.Gateway{}}, handler.EnqueueRequestsFromMapFunc(mapFn))
+	//if err != nil {
+	//	log.Error(err, "error watching gateways")
+	//	// This isn’t fatal
+	//}
 
-	// Watch for changes to primary resource Submariner
-	err = c.Watch(&source.Kind{Type: &submopv1a1.Submariner{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to secondary resource DaemonSets and requeue the owner Submariner
-	err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &submopv1a1.Submariner{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to the gateway status in the same namespace
-	mapFn := handler.MapFunc(
-		func(object client.Object) []reconcile.Request {
-			return []reconcile.Request{
-				{NamespacedName: types.NamespacedName{
-					Name:      "submariner",
-					Namespace: object.GetNamespace(),
-				}},
-			}
-		})
-	err = c.Watch(&source.Kind{Type: &submv1.Gateway{}}, handler.EnqueueRequestsFromMapFunc(mapFn))
-	if err != nil {
-		log.Error(err, "error watching gateways")
-		// This isn’t fatal
-	}
-
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&submopv1a1.Submariner{}).
-		Owns(&appsv1.Deployment{}).
-		Complete(r)
+	//return ctrl.NewControllerManagedBy(mgr).
+	//	For(&submopv1a1.Submariner{}).
+	//	Owns(&appsv1.Deployment{}).
+	//	Complete(r)
+	return nil
 }
