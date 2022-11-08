@@ -179,7 +179,7 @@ kustomize: $(KUSTOMIZE)
 
 # Generate kustomization.yaml for bundle
 kustomization: $(OPERATOR_SDK) $(KUSTOMIZE) is-semantic-version manifests
-	$(OPERATOR_SDK) generate kustomize manifests -q
+	$(OPERATOR_SDK) generate kustomize manifests -q --package submariner
 	(cd config/manifests && $(KUSTOMIZE) edit set image controller=$(IMG) && \
 	 $(KUSTOMIZE) edit set image repo=$(REPO))
 	sed -e 's/$${VERSION}/$(BUNDLE_VERSION)/g' config/bundle/kustomization.template.yaml > config/bundle/kustomization.yaml
@@ -193,6 +193,9 @@ bundle: $(KUSTOMIZE) $(OPERATOR_SDK) kustomization
 	($(KUSTOMIZE) build $(KUSTOMIZE_BASE_PATH) \
 	| $(OPERATOR_SDK) generate bundle -q --overwrite --version $(BUNDLE_VERSION) $(BUNDLE_METADATA_OPTS))
 	(cd config/bundle && $(KUSTOMIZE) edit add resource ../../bundle/manifests/submariner.clusterserviceversion.yaml)
+	cat config/bundle/kustomization.yaml
+	sed -i -e "s|SUBMARINER_OPERATOR_IMAGE|$(IMG)|g" config/bundle/kustomization.yaml
+	sed -i -e "s|VERSION|$(BUNDLE_VERSION)|g" config/bundle/kustomization.yaml
 	$(KUSTOMIZE) build config/bundle/ --load_restrictor=LoadRestrictionsNone --output bundle/manifests/submariner.clusterserviceversion.yaml
 	sed -i -e 's/$$(SHORT_VERSION)/$(SHORT_VERSION)/g' bundle/manifests/submariner.clusterserviceversion.yaml
 	sed -i -e 's/$$(VERSION)/$(VERSION)/g' bundle/manifests/submariner.clusterserviceversion.yaml
