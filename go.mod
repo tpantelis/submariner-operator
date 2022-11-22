@@ -11,7 +11,7 @@ require (
 	github.com/openshift/cluster-dns-operator v0.0.0-20200529200012-f9e4dfc90c57
 	github.com/operator-framework/operator-lib v0.11.0
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.60.1
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.61.0
 	github.com/prometheus-operator/prometheus-operator/pkg/client v0.60.1
 	github.com/prometheus/client_golang v1.14.0
 	github.com/submariner-io/admiral v0.14.0-m2
@@ -23,8 +23,8 @@ require (
 	k8s.io/apiextensions-apiserver v0.25.4
 	k8s.io/apimachinery v0.25.4
 	k8s.io/client-go v0.25.4
-	k8s.io/utils v0.0.0-20220823124924-e9cbc92d1a73
-	sigs.k8s.io/controller-runtime v0.12.3
+	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2
+	sigs.k8s.io/controller-runtime v0.13.1
 	sigs.k8s.io/controller-tools v0.10.0
 	sigs.k8s.io/kustomize/kustomize/v3 v3.10.0
 	sigs.k8s.io/yaml v1.3.0
@@ -46,6 +46,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
+	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-errors/errors v1.2.0 // indirect
@@ -126,7 +127,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/component-base v0.25.4 // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/klog/v2 v2.80.0 // indirect
+	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803164354-a70c9af30aea // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/kustomize/api v0.8.0 // indirect
