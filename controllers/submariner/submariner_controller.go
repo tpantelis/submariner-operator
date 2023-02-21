@@ -20,8 +20,11 @@ package submariner
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -119,8 +122,7 @@ func NewReconciler(config *Config) *Reconciler {
 //
 //nolint:gocyclo // Refactoring would yield functions with a lot of params which isn't ideal either.
 func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.V(2).WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling Submariner")
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 
 	// Fetch the Submariner instance
 	instance, err := r.getSubmariner(ctx, request.NamespacedName)
@@ -133,6 +135,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	if err != nil {
 		return reconcile.Result{}, err
 	}
+
+	reqLogger.Info("Reconciling Submariner", "ResourceVersion", instance.ResourceVersion)
 
 	instance, err = r.addFinalizer(ctx, instance)
 	if err != nil {
@@ -242,13 +246,73 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	if !reflect.DeepEqual(instance.Status, initialStatus) {
+		if instance.Status.NatEnabled != initialStatus.NatEnabled {
+			reqLogger.Info("**NatEnabled changed")
+		}
+
+		if instance.Status.AirGappedDeployment != initialStatus.AirGappedDeployment {
+			reqLogger.Info("**AirGappedDeployment changed")
+		}
+
+		if instance.Status.ClusterID != initialStatus.ClusterID {
+			reqLogger.Info("**ClusterID changed")
+		}
+
+		if instance.Status.GlobalCIDR != initialStatus.GlobalCIDR {
+			reqLogger.Info("**GlobalCIDR changed")
+		}
+
+		if instance.Status.NetworkPlugin != initialStatus.NetworkPlugin {
+			reqLogger.Info("**NetworkPlugin changed")
+		}
+
+		if !reflect.DeepEqual(instance.Status.DeploymentInfo, initialStatus.DeploymentInfo) {
+			b, _ := json.MarshalIndent(initialStatus.DeploymentInfo, "", "  ")
+			a, _ := json.MarshalIndent(instance.Status.DeploymentInfo, "", "  ")
+			reqLogger.Info(fmt.Sprintf("**DeploymentInfo changed: \nBEFORE: %s\nAFTER : %s", b, a))
+		}
+
+		if !reflect.DeepEqual(instance.Status.GatewayDaemonSetStatus, initialStatus.GatewayDaemonSetStatus) {
+			b, _ := json.MarshalIndent(initialStatus.GatewayDaemonSetStatus, "", "  ")
+			a, _ := json.MarshalIndent(instance.Status.GatewayDaemonSetStatus, "", "  ")
+			reqLogger.Info(fmt.Sprintf("**GatewayDaemonSetStatus changed: \nBEFORE: %s\nAFTER : %s", b, a))
+		}
+
+		if !reflect.DeepEqual(instance.Status.RouteAgentDaemonSetStatus, initialStatus.RouteAgentDaemonSetStatus) {
+			b, _ := json.MarshalIndent(initialStatus.RouteAgentDaemonSetStatus, "", "  ")
+			a, _ := json.MarshalIndent(instance.Status.RouteAgentDaemonSetStatus, "", "  ")
+			reqLogger.Info(fmt.Sprintf("**RouteAgentDaemonSetStatus changed: \nBEFORE: %s\nAFTER : %s", b, a))
+		}
+
+		if !reflect.DeepEqual(instance.Status.GlobalnetDaemonSetStatus, initialStatus.GlobalnetDaemonSetStatus) {
+			b, _ := json.MarshalIndent(initialStatus.GlobalnetDaemonSetStatus, "", "  ")
+			a, _ := json.MarshalIndent(instance.Status.GlobalnetDaemonSetStatus, "", "  ")
+			reqLogger.Info(fmt.Sprintf("**GlobalnetDaemonSetStatus changed: \nBEFORE: %s\nAFTER : %s", b, a))
+		}
+
+		if !reflect.DeepEqual(instance.Status.LoadBalancerStatus, initialStatus.LoadBalancerStatus) {
+			b, _ := json.MarshalIndent(initialStatus.LoadBalancerStatus, "", "  ")
+			a, _ := json.MarshalIndent(instance.Status.LoadBalancerStatus, "", "  ")
+			reqLogger.Info(fmt.Sprintf("**LoadBalancerStatus changed: \nBEFORE: %s\nAFTER : %s", b, a))
+		}
+
+		if !reflect.DeepEqual(instance.Status.Gateways, initialStatus.Gateways) {
+			b, _ := json.MarshalIndent(initialStatus.Gateways, "", "  ")
+			a, _ := json.MarshalIndent(instance.Status.Gateways, "", "  ")
+			reqLogger.Info(fmt.Sprintf("**Gateways changed: \nBEFORE: %s\nAFTER : %s", b, a))
+		}
+
 		err := r.config.ScopedClient.Status().Update(ctx, instance)
+		if apierrors.IsConflict(err) {
+			reqLogger.Info("conflict occurred on status update - requeuing")
+
+			return reconcile.Result{RequeueAfter: time.Millisecond * 100}, nil
+		}
+
 		if err != nil {
-			// Log the error, but indicate success, to avoid reconciliation storms
-			// TODO skitt determine what we should really be doing for concurrent updates to the Submariner CR
-			// Updates fail here because the instance is updated between the .Update() at the start of the function
-			// and the status update here
 			reqLogger.Error(err, "failed to update the Submariner status")
+
+			return reconcile.Result{}, err
 		}
 	}
 

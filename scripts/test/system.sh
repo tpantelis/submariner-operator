@@ -223,6 +223,7 @@ function verify_subm_op_pod() {
   kubectl get pod "$subm_operator_pod_name" --namespace="$subm_ns" -o jsonpath='{.status.phase}' | grep Running
 
   # Show SubM Operator pod logs
+  sleep 30
   kubectl logs "$subm_operator_pod_name" --namespace="$subm_ns"
 
   # TODO: Verify logs?
