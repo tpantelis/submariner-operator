@@ -39,3 +39,12 @@ verify="connectivity"
 subctl verify --only "${verify}" --submariner-namespace="$subm_ns" \
     --verbose --connection-timeout 20 --connection-attempts 4 \
     --context "${clusters[0]}" --tocontext "${clusters[1]}"
+
+echo "**********SA******************"
+
+kubectl get sa submariner-k8s-broker-admin --context "${clusters[0]}" -n submariner-k8s-broker -o=yaml
+
+echo "**********SECRETS******************"
+kubectl get secrets --context "${clusters[0]}" -n submariner-k8s-broker -o=yaml
+
+
