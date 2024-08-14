@@ -307,7 +307,8 @@ func (m *podMonitor) assertUninstallPodsCompleted() {
 	Expect(m.pods).ToNot(BeEmpty(), fmt.Sprintf("No uninstall pods were created for component %q", m.name))
 
 	for name, info := range m.pods {
-		if info.status.Phase == corev1.PodRunning {
+		if info.status.InitContainerStatuses[0].State.Terminated != nil &&
+			info.status.InitContainerStatuses[0].State.Terminated.ExitCode == 0 {
 			continue
 		}
 
@@ -318,7 +319,7 @@ func (m *podMonitor) assertUninstallPodsCompleted() {
 			log = info.log
 		}
 
-		Fail(fmt.Sprintf("Pod %q did not complete\nSTATUS: %s\n\nLOG\n: %s\n", name, string(status), log))
+		Fail(fmt.Sprintf("Pod %q did not complete successfully\nSTATUS: %s\n\nLOG\n: %s\n", name, string(status), log))
 	}
 }
 
