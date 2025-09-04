@@ -27,6 +27,7 @@ import (
 	"github.com/submariner-io/submariner-operator/api/v1alpha1"
 	"github.com/submariner-io/submariner-operator/pkg/discovery/network"
 	v1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -125,13 +126,18 @@ func fakeNode(name, podCIDR string) *v1.Node {
 }
 
 func testDiscoverNetworkSuccess(ctx context.Context, objects ...controllerClient.Object) *network.ClusterNetwork {
-	clusterNet, err := testDiscoverNetwork(ctx, objects...)
+	clusterNet, err := network.Discover(ctx, newTestClient(objects...), "")
 	Expect(err).NotTo(HaveOccurred())
+	Expect(clusterNet).NotTo(BeNil())
 
 	return clusterNet
 }
 
-func testDiscoverNetwork(ctx context.Context, objects ...controllerClient.Object) (*network.ClusterNetwork, error) {
-	client := newTestClient(objects...)
-	return network.Discover(ctx, client, "")
+func newServiceCIDR() *networkingv1.ServiceCIDR {
+	return &networkingv1.ServiceCIDR{
+		ObjectMeta: v1meta.ObjectMeta{Name: "kubernetes"},
+		Spec: networkingv1.ServiceCIDRSpec{
+			CIDRs: []string{testServiceCIDR},
+		},
+	}
 }
