@@ -20,6 +20,7 @@ package submariner
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/submariner-io/submariner-operator/api/v1alpha1"
@@ -47,6 +48,8 @@ type BrokerReconciler struct {
 
 func (r *BrokerReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
+
+	log.Info(fmt.Sprintf("***IN BrokerReconciler: %s", request.NamespacedName))
 
 	// Fetch the Broker instance
 	instance := &v1alpha1.Broker{}

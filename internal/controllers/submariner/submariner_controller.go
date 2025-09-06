@@ -21,6 +21,7 @@ package submariner
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -133,6 +134,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	// Fetch the Submariner instance
 	instance, err := r.getSubmariner(ctx, request.NamespacedName)
+
+	log.Info(fmt.Sprintf("***IN Submariner Reconcile: %s", request.NamespacedName))
+
 	if apierrors.IsNotFound(err) {
 		// Request object not found, could have been deleted after reconcile request.
 		// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.

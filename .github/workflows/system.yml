@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        globalnet: ['', 'globalnet']
+        globalnet: ['']
     steps:
       - name: Check out the repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -26,5 +26,5 @@ jobs:
           using: ${{ matrix.globalnet }}
 
       - name: Post mortem
-        if: failure()
+        if: always()
         uses: submariner-io/shipyard/gh-actions/post-mortem@devel
